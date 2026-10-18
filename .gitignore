@@ -1,0 +1,13 @@
+# Node Modules
+node_modules/
+
+# Environment Variables (Sensitif!)
+.env
+.env.local
+
+# Next.js Build
+client/.next/
+client/out/
+
+# Logs
+*.log
