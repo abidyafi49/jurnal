@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createPost } from "@/services/api";
+import { createPost, getCurrentUser } from "@/services/api";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -14,6 +14,36 @@ export default function CreatePostPage() {
   const [isPublished, setIsPublished] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [checkingAccess, setCheckingAccess] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    async function checkAccess() {
+      const result = await getCurrentUser();
+
+      if (!active) return;
+
+      if (!result.success || !result.data?.user) {
+        router.replace("/login");
+        return;
+      }
+
+      if (result.data.user.role !== "admin") {
+        router.replace("/newspaper");
+        return;
+      }
+
+      setCheckingAccess(false);
+    }
+
+    checkAccess();
+
+    return () => {
+      active = false;
+    };
+  }, [router]);
 
   // Handle submit form ke Backend API
   const handleSubmit = async (e) => {
@@ -44,6 +74,14 @@ export default function CreatePostPage() {
       setLoading(false);
     }
   };
+
+  if (checkingAccess) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-500">Memeriksa akses...</p>
+      </main>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">

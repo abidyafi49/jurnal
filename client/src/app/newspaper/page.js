@@ -7,14 +7,39 @@ export default function NewspaperPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadPublishedData() {
-      const data = await fetchPublishedPosts();
-      setPosts(data);
-      setLoading(false);
+
+useEffect(() => {
+  let active = true;
+
+  async function loadPublishedData() {
+    try {
+      const result = await fetchPublishedPosts();
+
+      if (!active) return;
+
+      const articles = Array.isArray(result?.data) ? result.data : [];
+
+      setPosts(articles);
+    } catch (error) {
+      console.error("Gagal memuat artikel:", error);
+
+      if (active) {
+        setPosts([]);
+      }
+    } finally {
+      if (active) {
+        setLoading(false);
+      }
     }
-    loadPublishedData();
-  }, []);
+  }
+
+  loadPublishedData();
+
+  return () => {
+    active = false;
+  };
+}, []);
+
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-gray-900 p-6 md:p-12 font-serif">

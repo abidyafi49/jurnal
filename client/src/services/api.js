@@ -1,43 +1,94 @@
 const API_BASE_URL = "http://localhost:5000/api";
 
-// Mengambil semua catatan untuk Admin (termasuk draft)
-export async function fetchAdminPosts() {
+async function apiRequest(path, options = {}) {
   try {
-    const response = await fetch(`${API_BASE_URL}/posts/admin`);
-    const json = await response.json();
-    return json.success ? json.data : [];
-  } catch (error) {
-    console.error('Gagal mengambil data admin posts:', error);
-    return [];
-  }
-}
-
-// Mengambil catatan yang sudah dipublikasikan untuk Newspaper publik
-export async function fetchPublishedPosts() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/posts/newspaper`);
-    const json = await response.json();
-    return json.success ? json.data : [];
-  } catch (error) {
-    console.error('Gagal mengambil data newspaper posts:', error);
-    return [];
-  }
-}
-
-// Membuat catatan / jurnal baru
-export async function createPost(postData) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/posts`, {
-      method: 'POST',
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      credentials: "include",
       headers: {
-        'Content-Type': 'application/json',
+        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...options.headers,
       },
-      body: JSON.stringify(postData),
     });
-    const json = await response.json();
-    return json;
+
+    const json = await response.json().catch(() => ({
+      success: false,
+      message: "Respons server tidak valid",
+    }));
+
+    return {
+      ...json,
+      status: response.status,
+    };
   } catch (error) {
-    console.error('Gagal membuat post baru:', error);
-    return { success: false, message: 'Terjadi kesalahan jaringan' };
+    console.error("API request gagal:", error);
+
+    return {
+      success: false,
+      message: "Tidak dapat terhubung ke server",
+      status: 0,
+    };
   }
+}
+
+// AUTH
+
+export function loginUser(credentials) {
+  return apiRequest("/auth/login", {
+    method: "POST",
+    body: JSON.stringify(credentials),
+  });
+}
+
+export function registerUser(userData) {
+  return apiRequest("/auth/register", {
+    method: "POST",
+    body: JSON.stringify(userData),
+  });
+}
+
+export function getCurrentUser() {
+  return apiRequest("/auth/me");
+}
+
+export function logoutUser() {
+  return apiRequest("/auth/logout", {
+    method: "POST",
+  });
+}
+
+// POSTS
+
+export async function fetchAdminPosts() {
+  const result = await apiRequest("/posts/admin");
+
+  if (!result.success) {
+    return {
+      success: false,
+      message: result.message,
+      status: result.status,
+      data: [],
+    };
+  }
+
+  return {
+    ...result,
+    data: result.data ?? [],
+  };
+}
+
+export async function fetchPublishedPosts() {
+  const result = await apiRequest("/posts/newspaper");
+
+  return {
+    ...result,
+    data: result.success ? (result.data ?? []) : [],
+  };
+}
+
+export function createPost(postData) {
+  return apiRequest("/posts", {
+    method: "POST",
+    body: JSON.stringify(postData),
+  });
 }
