@@ -2,26 +2,55 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
+const cookieParser = require("cookie-parser");
 
 const postRoutes = require("./routes/post.routes");
+const authRoutes = require("./routes/auth.routes")
 
 const app = express();
 
 // Middleware dasar
 app.use(express.json());
-app.use(cors());
+app.use(cookieParser());
+
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
+  }),
+);
 
 // Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 
 // Error Handling Middleware Sederhana
+
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
+  console.error(err);
+
+  if (err.code === 11000) {
+    return res.status(409).json({
+      success: false,
+      message: "Email sudah terdaftar",
+    });
+  }
+
+  if (err.name === "ValidationError") {
+    return res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+
+  const statusCode = err.statusCode || 500;
+
+  return res.status(statusCode).json({
     success: false,
-    message: err.message || "Terjadi kesalahan pada server",
+    message: statusCode < 500 ? err.message : "Terjadi kesalahan pada server",
   });
 });
+
 
 // Koneksi Database & Jalankan Server
 const PORT = process.env.PORT || 5000;
