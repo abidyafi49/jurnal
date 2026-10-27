@@ -92,3 +92,21 @@ export function createPost(postData) {
     body: JSON.stringify(postData),
   });
 }
+
+
+export function getPostById(id) {
+  return apiRequest(`/posts/${id}`);
+}
+
+export function updatePost(id, postData) {
+  return apiRequest(`/posts/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(postData),
+  });
+}
+
+export function deletePost(id) {
+  return apiRequest(`/posts/${id}`, {
+    method: "DELETE",
+  });
+}

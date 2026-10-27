@@ -37,6 +37,46 @@ class PostController {
       next(error);
     }
   }
+
+  async getById(req, res, next) {
+    try {
+      const post = await postService.getPostDetails(req.params.id);
+
+      res.status(200).json({
+        success: true,
+        data: post,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async update(req, res, next) {
+    try {
+      const updatedPost = await postService.updatePost(req.params.id, req.body);
+
+      res.status(200).json({
+        success: true,
+        message: "Artikel berhasil diperbarui",
+        data: updatedPost,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async delete(req, res, next) {
+    try {
+      await postService.deletePost(req.params.id);
+
+      res.status(200).json({
+        success: true,
+        message: "Artikel berhasil dihapus",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new PostController();

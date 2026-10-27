@@ -16,4 +16,29 @@ router.get(
 );
 router.get("/newspaper", postController.getPublished);
 
+// Admin: detail satu artikel
+router.get(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  postController.getById
+);
+
+// Admin: edit artikel atau ubah status publikasi
+router.patch(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  postController.update
+);
+
+// Admin: hapus artikel
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("admin"),
+  postController.delete
+);
+
+
 module.exports = router;
