@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createPost, getCurrentUser } from "@/services/api";
+import RichTextEditor from "@/components/RichTextEditor";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -157,14 +158,10 @@ export default function CreatePostPage() {
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Isi Catatan / Rangkuman Pembelajaran
               </label>
-              <textarea
-                rows="8"
+              <RichTextEditor
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Tuliskan poin-poin penting, kode, atau rangkuman materi di sini... (Bisa juga digunakan sebagai script konten TikTok nantinya)"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 text-sm"
-                required
-              ></textarea>
+                onChange={(value) => setContent(value)}
+              />
             </div>
 
             {/* Pilihan Status Publikasi (Checkbox) */}

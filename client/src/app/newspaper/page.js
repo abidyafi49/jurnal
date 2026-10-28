@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { fetchPublishedPosts } from "@/services/api";
+import DOMPurify from "isomorphic-dompurify";
 
 export default function NewspaperPage() {
   const [posts, setPosts] = useState([]);
@@ -99,9 +100,19 @@ useEffect(() => {
                     {post.title}
                   </h2>
 
-                  <div className="text-gray-700 leading-relaxed whitespace-pre-line text-base font-sans">
-                    {post.content}
-                  </div>
+                  <div
+                    className="
+    article-content
+    text-gray-700
+    leading-relaxed
+    text-base
+    font-sans
+    wrap-break-word
+  "
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(post.content || ""),
+                    }}
+                  />
                 </article>
               ))}
             </div>
@@ -110,9 +121,7 @@ useEffect(() => {
 
         {/* Footer */}
         <footer className="mt-16 pt-6 border-t border-gray-300 text-center text-xs font-sans text-gray-500">
-          <p>
-            © 2026 Jurnal Abid.
-          </p>
+          <p>© 2026 Jurnal Abid.</p>
         </footer>
       </div>
     </div>

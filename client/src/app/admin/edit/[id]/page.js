@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 import { getCurrentUser, getPostById, updatePost } from "@/services/api";
+import RichTextEditor from "@/components/RichTextEditor";
 
 const categories = [
   { value: "python", label: "Python" },
@@ -24,7 +25,8 @@ function EditArticleForm() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
+    const [message, setMessage] = useState("");
+    const [showPreview, setShowPreview] = useState("");
 
   const [form, setForm] = useState({
     title: "",
@@ -199,6 +201,15 @@ function EditArticleForm() {
           <p className="mt-2 text-sm text-gray-500">
             Perbarui informasi dan status publikasi artikel.
           </p>
+          <div className="mt-5">
+            <button
+              type="button"
+              onClick={() => setShowPreview((previous) => !previous)}
+              className="rounded-lg border border-blue-600 px-4 py-2 font-medium text-blue-600 hover:bg-blue-50"
+            >
+              {showPreview ? "Tutup Preview" : "Lihat Preview"}
+            </button>
+          </div>
 
           {error && (
             <div
@@ -207,6 +218,49 @@ function EditArticleForm() {
             >
               {error}
             </div>
+          )}
+
+          {showPreview && (
+            <section className="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white">
+              <div className="border-b border-gray-200 bg-gray-50 px-6 py-3">
+                <p className="text-sm font-medium text-gray-500">
+                  ARTICLE PREVIEW
+                </p>
+                <p className="text-xs text-gray-400">
+                  Pratinjau berdasarkan isi form saat ini
+                </p>
+              </div>
+
+              <article className="px-6 py-8 sm:px-10">
+                <p className="mb-4 text-sm font-semibold uppercase tracking-wider text-blue-600">
+                  {categories.find(
+                    (category) => category.value === form.category,
+                  )?.label || form.category}
+                </p>
+
+                <h2 className="text-3xl font-bold leading-tight text-gray-900">
+                  {form.title.trim() || "Judul artikel kamu"}
+                </h2>
+
+                <div className="my-6 border-b border-gray-200" />
+
+                <div className="whitespace-pre-wrap wrap-break-word text-base leading-8 text-gray-700">
+                  {form.content || "Isi artikel kamu akan tampil di sini."}
+                </div>
+
+                <div className="mt-8 border-t border-gray-200 pt-4">
+                  <span
+                    className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                      form.isPublished
+                        ? "bg-green-100 text-green-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {form.isPublished ? "Published" : "Draft"}
+                  </span>
+                </div>
+              </article>
+            </section>
           )}
 
           {message && (
@@ -271,15 +325,14 @@ function EditArticleForm() {
                 Isi Artikel
               </label>
 
-              <textarea
-                id="content"
-                name="content"
+              <RichTextEditor
                 value={form.content}
-                onChange={handleChange}
-                required
-                rows={12}
-                className="w-full resize-y rounded-lg border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                placeholder="Tulis isi artikel di sini..."
+                onChange={(content) =>
+                  setForm((previous) => ({
+                    ...previous,
+                    content,
+                  }))
+                }
               />
             </div>
 
