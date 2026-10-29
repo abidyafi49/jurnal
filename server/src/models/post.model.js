@@ -14,11 +14,15 @@ const postSchema = new mongoose.Schema({
     type: String,
     enum: ["python", "ros", "rl", "korean", "english", "daily", "other"],
     default: "daily",
-    },
-    isPublished: {
-        type: Boolean,
-        default: false
-    },
+  },
+  coverImage: {
+    type: String,
+    default: "",
+  },
+  isPublished: {
+      type: Boolean,
+      default: false
+  },
 },
     {
         timestamps: true

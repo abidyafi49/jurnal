@@ -35,7 +35,7 @@ class PostService {
   async updatePost(id, postData) {
     await this.getPostDetails(id);
 
-    const allowedFields = ["title", "content", "category", "isPublished"];
+    const allowedFields = ["title", "content", "category", "isPublished", "coverImage"];
 
     const updateData = {};
 

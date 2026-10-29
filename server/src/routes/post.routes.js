@@ -5,9 +5,16 @@ const {
     authenticate,
     authorize
 } = require("../middlewares/auth.middleware");
+const upload = require("../middlewares/upload.middleware");
 
 // Endpoint Admin & Public
-router.post("/", authenticate, authorize("admin"), postController.create);
+router.post(
+  "/",
+  authenticate,
+  authorize("admin"),
+  upload.single("coverImage"),
+  postController.create,
+);
 router.get(
   "/admin",
   authenticate,
@@ -29,7 +36,8 @@ router.patch(
   "/:id",
   authenticate,
   authorize("admin"),
-  postController.update
+  upload.single("coverImage"),
+  postController.update,
 );
 
 // Admin: hapus artikel

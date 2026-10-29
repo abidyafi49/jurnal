@@ -2,11 +2,14 @@ const API_BASE_URL = "http://localhost:5000/api";
 
 async function apiRequest(path, options = {}) {
   try {
+    const isFormDataBody =
+      typeof FormData !== "undefined" && options.body instanceof FormData;
+    
     const response = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
       credentials: "include",
       headers: {
-        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...(options.body && !isFormDataBody ? { "Content-Type": "application/json" } : {}),
         ...options.headers,
       },
     });
@@ -87,9 +90,20 @@ export async function fetchPublishedPosts() {
 }
 
 export function createPost(postData) {
+  const formData = new FormData();
+
+  formData.append("title", postData.title);
+  formData.append("category", postData.category);
+  formData.append("content", postData.content);
+  formData.append("isPublished", String(postData.isPublished));
+
+  if (postData.coverImage) {
+    formData.append("coverImage", postData.coverImage);
+  }
+
   return apiRequest("/posts", {
     method: "POST",
-    body: JSON.stringify(postData),
+    body: formData,
   });
 }
 
@@ -98,12 +112,25 @@ export function getPostById(id) {
   return apiRequest(`/posts/${id}`);
 }
 
+
 export function updatePost(id, postData) {
+  const formData = new FormData();
+
+  formData.append("title", postData.title);
+  formData.append("category", postData.category);
+  formData.append("content", postData.content);
+  formData.append("isPublished", String(postData.isPublished));
+
+  if (postData.coverImage) {
+    formData.append("coverImage", postData.coverImage);
+  }
+
   return apiRequest(`/posts/${id}`, {
     method: "PATCH",
-    body: JSON.stringify(postData),
+    body: formData,
   });
 }
+
 
 export function deletePost(id) {
   return apiRequest(`/posts/${id}`, {

@@ -15,8 +15,12 @@ export default function CreatePostPage() {
   const [isPublished, setIsPublished] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [coverImage, setCoverImage] = useState(null);
+  const [coverPreview, setCoverPreview] = useState("");
 
   const [checkingAccess, setCheckingAccess] = useState(true);
+
+
 
   useEffect(() => {
     let active = true;
@@ -46,6 +50,20 @@ export default function CreatePostPage() {
     };
   }, [router]);
 
+  useEffect(() => {
+    if (!coverImage) {
+      setCoverPreview("");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(coverImage);
+    setCoverPreview(previewUrl);
+
+    return () => {
+      URL.revokeObjectURL(previewUrl);
+    };
+  }, [coverImage]);
+
   // Handle submit form ke Backend API
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,6 +81,7 @@ export default function CreatePostPage() {
       category,
       content,
       isPublished,
+      coverImage
     };
 
     const result = await createPost(payload);
@@ -151,6 +170,76 @@ export default function CreatePostPage() {
                 <option value="daily">Daily Journal & Productivity</option>
                 <option value="other">Lainnya</option>
               </select>
+            </div>
+
+            {/* Cover Image */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Gambar Sampul Artikel
+              </label>
+
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+
+                  if (!file) return;
+
+                  const allowedTypes = [
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp",
+                  ];
+
+                  if (!allowedTypes.includes(file.type)) {
+                    setErrorMessage("Pilih gambar JPG, PNG, atau WEBP.");
+                    e.target.value = "";
+                    return;
+                  }
+
+                  if (file.size > 5 * 1024 * 1024) {
+                    setErrorMessage("Ukuran gambar maksimal 5 MB.");
+                    e.target.value = "";
+                    return;
+                  }
+
+                  setErrorMessage("");
+                  setCoverImage(file);
+                }}
+                className="block w-full text-sm text-gray-600
+      file:mr-4 file:rounded-lg file:border-0
+      file:bg-indigo-50 file:px-4 file:py-2
+      file:font-semibold file:text-indigo-700
+      hover:file:bg-indigo-100"
+              />
+
+              <p className="mt-2 text-xs text-gray-500">
+                Format JPG, PNG, atau WEBP. Maksimal 5 MB. Gambar sampul
+                bersifat opsional.
+              </p>
+
+              {coverPreview && (
+                <div className="mt-4">
+                  <p className="mb-2 text-sm font-medium text-gray-700">
+                    Preview gambar sampul
+                  </p>
+
+                  <img
+                    src={coverPreview}
+                    alt="Preview gambar sampul"
+                    className="w-full max-h-80 object-cover rounded-xl border border-gray-200"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setCoverImage(null)}
+                    className="mt-2 text-sm text-red-600 hover:underline"
+                  >
+                    Hapus gambar pilihan
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Input Konten / Isi Jurnal */}

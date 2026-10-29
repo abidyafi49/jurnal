@@ -96,6 +96,15 @@ useEffect(() => {
                     </span>
                   </div>
 
+                  {post.coverImage && (
+                    <img
+                      src={`http://localhost:5000${post.coverImage}`}
+                      alt={`Sampul: ${post.title}`}
+                      className="mb-6 max-h-420px w-full rounded-lg object-cover"
+                      loading="lazy"
+                    />
+                  )}
+
                   <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 hover:text-indigo-600 transition">
                     {post.title}
                   </h2>

@@ -28,12 +28,17 @@ function EditArticleForm() {
     const [message, setMessage] = useState("");
     const [showPreview, setShowPreview] = useState("");
 
+
   const [form, setForm] = useState({
     title: "",
     category: "other",
     content: "",
-    isPublished: false,
+      isPublished: false,
+    coverImage: "",
   });
+    
+    const [coverFile, setCoverFile] = useState(null);
+    const [coverPreview, setCoverPreview] = useState("");
 
   // Periksa sesi admin dan ambil artikel
   useEffect(() => {
@@ -88,7 +93,8 @@ function EditArticleForm() {
           title: article.title || "",
           category: article.category || "other",
           content: article.content || "",
-          isPublished: Boolean(article.isPublished),
+            isPublished: Boolean(article.isPublished),
+          coverImage: article.coverImage || "",
         });
       } catch (err) {
         if (active) {
@@ -109,6 +115,20 @@ function EditArticleForm() {
       active = false;
     };
   }, [id, router]);
+    
+    useEffect(() => {
+      if (!coverFile) {
+        setCoverPreview("");
+        return;
+      }
+
+      const previewUrl = URL.createObjectURL(coverFile);
+      setCoverPreview(previewUrl);
+
+      return () => {
+        URL.revokeObjectURL(previewUrl);
+      };
+    }, [coverFile]);
 
   function handleChange(event) {
     const { name, value, checked, type } = event.target;
@@ -137,7 +157,8 @@ function EditArticleForm() {
         title: form.title.trim(),
         category: form.category,
         content: form.content,
-        isPublished: form.isPublished,
+          isPublished: form.isPublished,
+        coverImage: coverFile
       });
 
       if (!result.success) {
@@ -315,6 +336,84 @@ function EditArticleForm() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Gambar Sampul */}
+            <div>
+              <label
+                htmlFor="coverImage"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                Gambar Sampul
+              </label>
+
+              <input
+                id="coverImage"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+
+                  if (!file) return;
+
+                  const allowedTypes = [
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp",
+                  ];
+
+                  if (!allowedTypes.includes(file.type)) {
+                    setError("Pilih gambar JPG, PNG, atau WEBP.");
+                    event.target.value = "";
+                    return;
+                  }
+
+                  if (file.size > 5 * 1024 * 1024) {
+                    setError("Ukuran gambar maksimal 5 MB.");
+                    event.target.value = "";
+                    return;
+                  }
+
+                  setError("");
+                  setCoverFile(file);
+                }}
+                className="block w-full rounded-lg border border-gray-300 p-3 text-sm"
+              />
+
+              <p className="mt-2 text-xs text-gray-500">
+                JPG, PNG, atau WEBP. Maksimal 5 MB. Kosongkan jika tidak ingin
+                mengganti gambar.
+              </p>
+
+              {(coverPreview || form.coverImage) && (
+                <div className="mt-4">
+                  <p className="mb-2 text-sm font-medium text-gray-700">
+                    {coverFile ? "Preview gambar baru" : "Gambar saat ini"}
+                  </p>
+
+                  <img
+                    src={
+                      coverPreview || `http://localhost:5000${form.coverImage}`
+                    }
+                    alt="Gambar sampul artikel"
+                    className="max-h-80 w-full rounded-xl border border-gray-200 object-cover"
+                  />
+
+                  {coverFile && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCoverFile(null);
+                        const input = document.getElementById("coverImage");
+                        if (input) input.value = "";
+                      }}
+                      className="mt-2 text-sm text-red-600 hover:underline"
+                    >
+                      Batalkan gambar baru
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             <div>
